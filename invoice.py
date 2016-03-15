@@ -32,14 +32,27 @@ class Invoice:
     @ModelView.button
     @Workflow.transition('draft')
     def draft(cls, invoices):
-        Move = Pool().get('account.move')
-
+        pool = Pool()
+        Move = pool.get('account.move')
+        try:
+            Payment = pool.get('account.payment')
+        except KeyError:
+            Payment = None
         moves = []
+        lines = []
         for invoice in invoices:
             if invoice.move:
                 moves.append(invoice.move)
+                lines.extend([l.id for l in invoice.move.lines])
         if moves:
             Move.draft(moves)
+        if Payment:
+            payments = Payment.search([
+                    ('line', 'in', lines),
+                    ('state', '=', 'failed'),
+                    ])
+            if payments:
+                Payment.write(payments, {'line': None})
         cls.write(invoices, {
             'invoice_report_format': None,
             'invoice_report_cache': None,
