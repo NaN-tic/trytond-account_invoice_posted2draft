@@ -25,10 +25,6 @@ class AccountInvoicePosted2DraftTestCase(unittest.TestCase):
 
 def suite():
     suite = trytond.tests.test_tryton.suite()
-    from trytond.modules.company.tests import test_company
-    for test in test_company.suite():
-        if test not in suite:
-            suite.addTest(test)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
         AccountInvoicePosted2DraftTestCase))
     return suite
