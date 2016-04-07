@@ -4,6 +4,7 @@
 from trytond.model import Workflow, ModelView
 from trytond.pyson import Eval
 from trytond.pool import Pool, PoolMeta
+from trytond.tools import grouped_slice
 
 __all__ = ['Invoice']
 __metaclass__ = PoolMeta
@@ -38,6 +39,10 @@ class Invoice:
             Payment = pool.get('account.payment')
         except KeyError:
             Payment = None
+        try:
+            Commission = pool.get('commission')
+        except KeyError:
+            Commission = None
         moves = []
         lines = []
         for invoice in invoices:
@@ -53,6 +58,13 @@ class Invoice:
                     ])
             if payments:
                 Payment.write(payments, {'line': None})
+        if Commission:
+            for sub_invoices in grouped_slice(invoices):
+                ids = [i.id for i in sub_invoices]
+                commissions = Commission.search([
+                        ('origin.invoice', 'in', ids, 'account.invoice.line'),
+                        ])
+                Commission.delete(commissions)
         cls.write(invoices, {
             'invoice_report_format': None,
             'invoice_report_cache': None,
