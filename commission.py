@@ -20,6 +20,12 @@ class Invoice:
             commissions = Commission.search([
                     ('origin.invoice', 'in', ids, 'account.invoice.line'),
                     ])
+            if commissions:
+                commissions_origin = Commission.search([
+                        ('origin.id', 'in', [c.id for c in commissions], 'commission'),
+                        ])
+                if commissions_origin:
+                    commissions += commissions_origin
             Commission.delete(commissions)
 
         return super(Invoice, cls).draft(invoices)
