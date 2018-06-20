@@ -33,21 +33,10 @@ class Invoice:
                 })
 
     @classmethod
-    @ModelView.button
-    @Workflow.transition('draft')
     def draft(cls, invoices):
-        pool = Pool()
-        Move = pool.get('account.move')
-        try:
-            Payment = pool.get('account.payment')
-        except KeyError:
-            Payment = None
-        try:
-            Commission = pool.get('commission')
-        except KeyError:
-            Commission = None
+        Move = Pool().get('account.move')
+
         moves = []
-        lines = []
         for invoice in invoices:
             if invoice.move:
                 if invoice.move.period.state == 'close':
@@ -56,24 +45,9 @@ class Invoice:
                             'period': invoice.move.period.rec_name,
                             })
                 moves.append(invoice.move)
-                lines.extend([l.id for l in invoice.move.lines])
         if moves:
             with Transaction().set_context(draft_invoices=True):
                 Move.write(moves, {'state': 'draft'})
-        if Payment:
-            payments = Payment.search([
-                    ('line', 'in', lines),
-                    ('state', '=', 'failed'),
-                    ])
-            if payments:
-                Payment.write(payments, {'line': None})
-        if Commission:
-            for sub_invoices in grouped_slice(invoices):
-                ids = [i.id for i in sub_invoices]
-                commissions = Commission.search([
-                        ('origin.invoice', 'in', ids, 'account.invoice.line'),
-                        ])
-                Commission.delete(commissions)
         cls.write(invoices, {
             'invoice_report_format': None,
             'invoice_report_cache': None,
