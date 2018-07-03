@@ -18,5 +18,5 @@ def register():
         module='account_invoice_posted2draft', type_='model')
     Pool.register(
         commission.Invoice,
-        depends=['purchase'],
+        depends=['commission'],
         module='account_invoice_posted2draft', type_='model')
