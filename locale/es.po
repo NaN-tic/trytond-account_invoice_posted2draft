@@ -2,14 +2,12 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "error:account.invoice:"
+msgctxt "model:ir.message,text:cancel_invoice_with_number"
+msgid "You cannot cancel an invoice with number"
+msgstr ""
+
+msgctxt "model:ir.message,text:draft_closed_period"
 msgid ""
 "You can not set to draft invoice \"%(invoice)s\" because period "
 "\"%(period)s\" is closed."
 msgstr ""
-"No se puede pasar a borrador la factura \"%(invoice)s\" porqué el periodo "
-"\"%(period)s\" esta cerrado."
-
-msgctxt "error:account.invoice:"
-msgid "You cannot cancel an invoice with number."
-msgstr "No puede cancelar una factura con número asignado."
