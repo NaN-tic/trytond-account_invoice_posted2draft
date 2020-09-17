@@ -28,17 +28,32 @@ class Invoice(metaclass=PoolMeta):
 
     @classmethod
     def draft(cls, invoices):
-        Move = Pool().get('account.move')
+        pool = Pool()
+        Move = pool.get('account.move')
+        JournalPeriod = pool.get('account.journal.period')
 
         moves = []
         for invoice in invoices:
             if invoice.move:
+                # check period is closed
                 if invoice.move.period.state == 'close':
                     raise UserError(gettext(
-                        'account_invoice_posted2draft.draft_closed_period',
+                        'account_invoice_posted2draft.msg_draft_closed_period',
                             invoice=invoice.rec_name,
                             period=invoice.move.period.rec_name,
                             ))
+                # check period and journal is closed
+                journal_periods = JournalPeriod.search([
+                        ('journal', '=', invoice.move.journal.id),
+                        ('period', '=', invoice.move.period.id),
+                        ], limit=1)
+                if journal_periods:
+                    journal_period, = journal_periods
+                    if journal_period.state == 'close':
+                        raise UserError(gettext(
+                            'account_invoice_posted2draft.msg_modify_closed_journal_period',
+                                invoice=invoice.rec_name,
+                                journal_period=journal_period.rec_name))
                 moves.append(invoice.move)
         if moves:
             with Transaction().set_context(draft_invoices=True):
@@ -55,7 +70,7 @@ class Invoice(metaclass=PoolMeta):
         for invoice in invoices:
             if invoice.type == 'out' and invoice.number:
                 raise UserError(gettext(
-                    'account_invoice_posted2draft.cancel_invoice_with_number'))
+                    'account_invoice_posted2draft.msg_cancel_invoice_with_number'))
 
         return super(Invoice, cls).cancel(invoices)
 

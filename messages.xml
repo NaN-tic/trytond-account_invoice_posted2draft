@@ -3,11 +3,14 @@
 this repository contains the full copyright notices and license terms. -->
 <tryton>
     <data grouped="1">
-    <record model="ir.message" id="draft_closed_period">
-        <field name="text">You can not set to draft invoice "%(invoice)s" because period "%(period)s" is closed.</field>
-    </record>
-    <record model="ir.message" id="cancel_invoice_with_number">
-        <field name="text">You cannot cancel an invoice with number</field>
-    </record>
+        <record model="ir.message" id="msg_draft_closed_period">
+            <field name="text">You can not set to draft invoice "%(invoice)s" because period "%(period)s" is closed.</field>
+        </record>
+        <record model="ir.message" id="msg_cancel_invoice_with_number">
+            <field name="text">You cannot cancel an invoice with number</field>
+        </record>
+        <record model="ir.message" id="msg_modify_closed_journal_period">
+            <field name="text">You can not set to draft invoice "%(invoice)s" on closed journal-period "%(journal_period)s".</field>
+        </record>
     </data>
 </tryton>
