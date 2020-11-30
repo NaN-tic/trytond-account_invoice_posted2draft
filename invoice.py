@@ -1,7 +1,6 @@
 # This file is part account_invoice_posted2draft module for Tryton.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
-from trytond.model import Workflow
 from trytond.pyson import Eval
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
@@ -65,13 +64,12 @@ class Invoice(metaclass=PoolMeta):
         return super(Invoice, cls).draft(invoices)
 
     @classmethod
-    @Workflow.transition('cancel')
     def cancel(cls, invoices):
         for invoice in invoices:
             if invoice.type == 'out' and invoice.number:
-                raise UserError(gettext(
-                    'account_invoice_posted2draft.msg_cancel_invoice_with_number'))
-
+                raise UserError(
+                    gettext('account_invoice_posted2draft.msg_cancel_invoice_with_number',
+                        invoice=invoice.rec_name))
         return super(Invoice, cls).cancel(invoices)
 
 
