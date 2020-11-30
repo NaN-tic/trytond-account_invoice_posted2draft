@@ -3,8 +3,8 @@ msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
 msgctxt "model:ir.message,text:msg_cancel_invoice_with_number"
-msgid "You cannot cancel invoice "%(invoice)s" because it already has a number."
-msgstr "No podeu cancel·lar la factura "%(invoice)s\" amb un número assignat."
+msgid "You cannot cancel invoice \"%(invoice)s\" because it already has a number."
+msgstr "No podeu cancel·lar la factura \"%(invoice)s\" amb un número assignat."
 
 msgctxt "model:ir.message,text:msg_draft_closed_period"
 msgid ""
