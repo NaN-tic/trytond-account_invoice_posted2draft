@@ -7,8 +7,6 @@ from trytond.transaction import Transaction
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 
-__all__ = ['Invoice', 'Move']
-
 
 class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
@@ -50,7 +48,8 @@ class Invoice(metaclass=PoolMeta):
                     journal_period, = journal_periods
                     if journal_period.state == 'close':
                         raise UserError(gettext(
-                            'account_invoice_posted2draft.msg_modify_closed_journal_period',
+                            'account_invoice_posted2draft.'
+                                'msg_modify_closed_journal_period',
                                 invoice=invoice.rec_name,
                                 journal_period=journal_period.rec_name))
                 moves.append(invoice.move)
@@ -68,7 +67,8 @@ class Invoice(metaclass=PoolMeta):
         for invoice in invoices:
             if invoice.type == 'out' and invoice.number:
                 raise UserError(
-                    gettext('account_invoice_posted2draft.msg_cancel_invoice_with_number',
+                    gettext('account_invoice_posted2draft.'
+                        'msg_cancel_invoice_with_number',
                         invoice=invoice.rec_name))
         return super(Invoice, cls).cancel(invoices)
 
