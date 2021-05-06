@@ -60,7 +60,8 @@ class Invoice(metaclass=PoolMeta):
             'invoice_report_format': None,
             'invoice_report_cache': None,
             })
-        return super(Invoice, cls).draft(invoices)
+        with Transaction().set_context(draft_invoices=True):
+            return super(Invoice, cls).draft(invoices)
 
     @classmethod
     def cancel(cls, invoices):
