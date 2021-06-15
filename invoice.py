@@ -81,17 +81,6 @@ class Invoice(metaclass=PoolMeta):
         with Transaction().set_context(cancel_from_credit=True):
             return super().credit(invoices, refund)
 
-    @classmethod
-    def cancel(cls, invoices):
-        if not Transaction().context.get('cancel_from_credit', False):
-            for invoice in invoices:
-                if invoice.type == 'out' and invoice.number:
-                    raise UserError(
-                        gettext('account_invoice_posted2draft.'
-                            'msg_cancel_invoice_with_number',
-                            invoice=invoice.rec_name))
-        return super(Invoice, cls).cancel(invoices)
-
 
 class Move(metaclass=PoolMeta):
     __name__ = 'account.move'

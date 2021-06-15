@@ -110,13 +110,6 @@ Move it back to draft::
     >>> receivable.debit
     Decimal('0.00')
 
-Out invoices can not canel it once posted::
-
-    >>> invoice.click('cancel')  # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-        ...
-    UserError: ...
-
 Invoices can not be set to draft if period is closed::
 
     >>> invoice.click('post')
