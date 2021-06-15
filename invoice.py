@@ -27,9 +27,11 @@ class Invoice(metaclass=PoolMeta):
     def draft(cls, invoices):
         pool = Pool()
         Move = pool.get('account.move')
+        MoveLine = pool.get('account.move.line')
         JournalPeriod = pool.get('account.journal.period')
 
         moves = []
+        payment_lines = []
         for invoice in invoices:
             if invoice.move:
                 # check period is closed
@@ -53,9 +55,20 @@ class Invoice(metaclass=PoolMeta):
                                 invoice=invoice.rec_name,
                                 journal_period=journal_period.rec_name))
                 moves.append(invoice.move)
+            if invoice.payment_lines:
+                for payment_line in invoice.payment_lines:
+                    if payment_line.move and payment_line.move.lines:
+                        for lines in payment_line.move.lines:
+                            payment_lines.append(lines)
+
         if moves:
             with Transaction().set_context(draft_invoices=True):
                 Move.write(moves, {'state': 'draft'})
+                # If the payment lines dont have a reconciliation, then the field
+                # invoice_payment will be fill up, and when we try to draft an
+                # invoice it will give us an error
+                if payment_lines:
+                    MoveLine.write(payment_lines, {'invoice_payment':None})
         cls.write(invoices, {
             'invoice_report_format': None,
             'invoice_report_cache': None,
