@@ -67,7 +67,7 @@ class Invoice(metaclass=PoolMeta):
                 # If the payment lines dont have a reconciliation, then the field
                 # invoice_payment will be fill up, and when we try to draft an
                 # invoice it will give us an error
-                if lines:
+                if payment_lines:
                     MoveLine.write(payment_lines, {'invoice_payment':None})
         cls.write(invoices, {
             'invoice_report_format': None,
