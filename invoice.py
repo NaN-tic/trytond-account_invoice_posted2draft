@@ -77,9 +77,9 @@ class Invoice(metaclass=PoolMeta):
             return super(Invoice, cls).draft(invoices)
 
     @classmethod
-    def credit(cls, invoices, refund=False):
+    def credit(cls, invoices, refund=False, **values):
         with Transaction().set_context(cancel_from_credit=True):
-            return super().credit(invoices, refund)
+            return super().credit(invoices, refund, **values)
 
 
 class Move(metaclass=PoolMeta):
