@@ -16,12 +16,9 @@ class Invoice(metaclass=PoolMeta):
         super(Invoice, cls).__setup__()
         cls._check_modify_exclude.add('move')
         cls._transitions |= set((('posted', 'draft'),))
-        cls._buttons.update({
-                'draft': {
-                    'invisible': (Eval('state').in_(['draft', 'paid'])
-                        | ((Eval('state') == 'cancelled') & Eval('cancel_move'))),
-                    },
-                })
+        cls._buttons['draft']['invisible'] = (
+            Eval('state').in_(['draft', 'paid']) | (
+                (Eval('state') == 'cancelled') & Eval('cancel_move')))
 
     @classmethod
     def draft(cls, invoices):
