@@ -1,0 +1,24 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: account_invoice_posted2draft\n"
+"Language: de\n"
+
+#: 
+msgctxt "model:ir.message,text:msg_cancel_invoice_with_number"
+msgid "You cannot cancel invoice \"%(invoice)s\" because it already has a number."
+msgstr "Rechnung \"%(invoice)s\" kann nicht storniert werden, da sie bereits eine Nummer hat."
+
+#: 
+msgctxt "model:ir.message,text:msg_draft_closed_period"
+msgid "You can not set to draft invoice \"%(invoice)s\" because period \"%(period)s\" is closed."
+msgstr "Sie können die Rechnung \"%(invoice)s\" nicht auf Entwurf setzen, da der Erfassungszeitraum \"%(period)s\" geschlossen ist."
+
+#: 
+msgctxt "model:ir.message,text:msg_modify_closed_journal_period"
+msgid "You can not set to draft invoice \"%(invoice)s\" on closed journal-period \"%(journal_period)s\"."
+msgstr "Sie können die Rechnung \"%(invoice)s\" nicht auf Entwurf setzen, da der Erfassungszeitraum \"%(journal_period)s\" geschlossen ist."
+
