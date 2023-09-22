@@ -4,15 +4,14 @@
 from trytond.pool import Pool, PoolMeta
 from trytond.tools import grouped_slice
 
-__all__ = ['Invoice']
-
 
 class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
 
     @classmethod
     def draft(cls, invoices):
-        Commission = Pool().get('commission')
+        pool = Pool()
+        Commission = pool.get('commission')
 
         for sub_invoices in grouped_slice(invoices):
             ids = [i.id for i in sub_invoices]
