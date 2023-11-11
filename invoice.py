@@ -18,7 +18,6 @@ class Invoice(metaclass=PoolMeta):
     @classmethod
     def __setup__(cls):
         super(Invoice, cls).__setup__()
-        #cls._check_modify_exclude.add('move')
         cls._transitions |= set((('posted', 'draft'),))
         cls._buttons['draft']['invisible'] = ~Eval('allow_draft', False)
         cls._buttons['draft']['depends'] += tuple(['allow_draft'])
