@@ -3,7 +3,7 @@
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
 from trytond.i18n import gettext
-from trytond.exceptions import UserWarning
+from trytond.exceptions import UserError
 
 
 class Invoice(metaclass=PoolMeta):
@@ -30,14 +30,8 @@ class Invoice(metaclass=PoolMeta):
                             ('state', '!=', 'failed'),
                             ])
                     if payments:
-                        warning_key = Warning.format(
-                            'invoice_in_payment', future_invoices)
-                        if Warning.check(warning_key):
-                            raise UserWarning(warning_key,
-                                gettext('account_invoice_posted2draft'
-                                    '.msg_invoice_in_payment',
-                                    invoice=invoice.rec_name,
-                                    payments=", ".join(
-                                        [p.id for p in payments])))
-
+                        raise UserError(gettext('account_invoice_posted2draft'
+                                '.msg_invoice_in_payment',
+                                invoice=invoice.rec_name,
+                                payments=", ".join([p.id for p in payments])))
         return super().draft(invoices)

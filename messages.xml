@@ -7,7 +7,7 @@ this repository contains the full copyright notices and license terms. -->
             <field name="text">You cannot create an account compesantion move in the period %(period)s because is closed.</field>
         </record>
         <record model="ir.message" id="msg_invoice_in_payment">
-            <field name="text">The invoice %(invoice)s have one or more move lines in payments [IDs: %(payments)s]. This means that is possible that this payment will be in a payment group and this group upload on a Bank. Are you sure that you want to draft the invoice?</field>
+            <field name="text">The invoice %(invoice)s could not be possible to draft, becasue it have one or more move lines in payments [IDs: %(payments)s]. This means that is possible that this payment will be in a payment group and this group upload on a Bank.</field>
         </record>
     </data>
 </tryton>

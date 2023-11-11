@@ -24,7 +24,14 @@ class Invoice(metaclass=PoolMeta):
         cls._buttons['draft']['depends'] += tuple(['allow_draft'])
 
     def get_allow_draft(self, name):
-        if self.state not in {'posted', 'cancelled', 'validated'}:
+        # when IN invoice is validate from scratch, the move is in 'draft'
+        # state, so in this case could be draft in a "normal" way
+        if (self.state == 'validated' and self.move
+                and self.move.state != 'draft'):
+            return False
+        elif self.state == 'cancelled' and self.number is not None:
+            return False
+        elif self.state in {'paid', 'draft'}:
             return False
         elif self.state == 'posted':
             lines_to_pay = [l for l in self.lines_to_pay
@@ -49,38 +56,25 @@ class Invoice(metaclass=PoolMeta):
         to_draft = []
         to_save = []
         for invoice in invoices:
-            if (not invoice.allow_draft
-                    or (invoice.state in ('validated', 'cancelled')
-                        and invoice.number is None)):
+            if not invoice.allow_draft:
+                continue
+
+            move = invoice.move
+            if move:
+                if move.state == 'draft':
+                    to_draft.append(invoice)
+                else:
+                    to_save.append(invoice)
+                    cancel_move = move.cancel(reversal=True)
+                    Move.post([cancel_move])
+                    moves.extend((invoice.move, cancel_move))
+                    invoice.move = None
+            else:
                 to_draft.append(invoice)
-                continue
-
-            if invoice.state == 'canceled':
-                invoice.additional_moves += tuple(
-                    [invoice.move, invoice.cnacel_move])
-                to_save.append(invoice)
-                continue
-
-            if invoice.state == 'validated':
-                to_save.append(invoice)
-                continue
-
-            lines_to_pay = [l for l in invoice.lines_to_pay
-                if not l.reconciliation]
-            extra_lines = [l for l in invoice.move.lines
-                if not l.account.reconcile]
-
-            compensation_move = Move.create_compensation_move(
-                lines_to_pay + extra_lines, origin=invoice)
-            moves.append(compensation_move)
-
-            invoice.additional_moves += tuple(
-                [invoice.move, compensation_move])
-            invoice.move = None
-            to_save.append(invoice)
-
-        if moves:
-            Move.post(moves)
+            if invoice.cancel_move:
+                moves.append(invoice.cancel_move)
+                invoice.cancel_move = None
+            invoice.additional_moves += tuple(moves)
 
         # Only make the special steps for the invoices that came from 'posted'
         # state or 'validated', 'canceled' with number, so the invoice have one
@@ -103,5 +97,6 @@ class Invoice(metaclass=PoolMeta):
             if to_reconcile:
                 MoveLine.reconcile(to_reconcile)
 
+        # Remove links to lines which actually do not pay the invoice
         if to_save:
             cls._clean_payments(to_save)
