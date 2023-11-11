@@ -13,7 +13,6 @@ class Invoice(metaclass=PoolMeta):
     def draft(cls, invoices):
         pool = Pool()
         Payment = pool.get('account.payment')
-        Warning = pool.get('res.user.warning')
 
         for invoice in invoices:
             moves = []
