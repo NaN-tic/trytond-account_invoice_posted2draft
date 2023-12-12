@@ -10,7 +10,7 @@ class Move(metaclass=PoolMeta):
 
     @classmethod
     def check_modify(cls, *args, **kwargs):
-        # As now the moves related to an invoice are not delete when 'darf'
+        # As now the moves related to an invoice are not delete when 'draft'
         # the invoice, is needed to modify some restricted fields when the
         # move is in post state
         if Transaction().context.get('invoice_posted2draft', False):
@@ -19,9 +19,9 @@ class Move(metaclass=PoolMeta):
 
     @classmethod
     def delete(cls, moves):
-        # When invoice is set to 'draft', try to delete the move's assocaited
-        # in 'move' and 'additional_move' fields. If this moves are post
-        # need to be not delete and matain them as historize
+        # When invoice is set to 'draft', try to delete the move's associated
+        # in 'move' and 'additional_move' fields. If these moves are posted
+        # they cannot be deleted but keep them as history
         if Transaction().context.get('invoice_posted2draft', False):
             return
         super().delete(moves)
@@ -32,7 +32,7 @@ class Line(metaclass=PoolMeta):
 
     @classmethod
     def check_modify(cls, lines, modified_fields=None):
-        # As now the moves related to an invoice are not delete when 'darf'
+        # As now the moves related to an invoice are not delete when 'draft'
         # the invoice, is needed to modify some restricted fields when the
         # move is in post state
         if Transaction().context.get('invoice_posted2draft', False):

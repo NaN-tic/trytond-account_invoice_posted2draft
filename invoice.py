@@ -35,7 +35,7 @@ class Invoice(metaclass=PoolMeta):
         elif self.state == 'posted':
             lines_to_pay = [l for l in self.lines_to_pay
                 if not l.reconciliation]
-            # Invoice allready paid or partial paid, could not be possible
+            # Invoice already paid or partial paid, should not be possible
             # to change state to draft.
             if (not lines_to_pay
                     or self.amount_to_pay != self.total_amount):
@@ -76,7 +76,7 @@ class Invoice(metaclass=PoolMeta):
             invoice.additional_moves += tuple(moves)
 
         # Only make the special steps for the invoices that came from 'posted'
-        # state or 'validated', 'canceled' with number, so the invoice have one
+        # state or 'validated', 'cancelled' with number, so the invoice have one
         # or more move associated.
         # The other possible invoices follow the standard workflow.
         if to_draft:
