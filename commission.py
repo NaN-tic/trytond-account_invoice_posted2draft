@@ -4,27 +4,43 @@
 from trytond.pool import Pool, PoolMeta
 from trytond.tools import grouped_slice
 
-__all__ = ['Invoice']
-
 
 class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
 
+    def get_allow_draft(self, name):
+        pool = Pool()
+        Commission = pool.get('commission')
+
+        result = super().get_allow_draft(name)
+
+        invoiced = Commission.search([
+                ('origin.invoice', '=', self.id, 'account.invoice.line'),
+                ('invoice_line', '!=', None),
+                ])
+        if invoiced:
+            result = False
+        return result
+
     @classmethod
     def draft(cls, invoices):
-        Commission = Pool().get('commission')
+        pool = Pool()
+        Commission = pool.get('commission')
 
+        to_delete = []
         for sub_invoices in grouped_slice(invoices):
             ids = [i.id for i in sub_invoices]
-            commissions = Commission.search([
+            to_delete = Commission.search([
                     ('origin.invoice', 'in', ids, 'account.invoice.line'),
+                    ('invoice_line', '=', None),
                     ])
-            if commissions:
-                commissions_origin = Commission.search([
-                        ('origin.id', 'in', [c.id for c in commissions], 'commission'),
+            if to_delete:
+                to_delete_origin = Commission.search([
+                        ('origin.id', 'in',
+                            [x.id for x in to_delete], 'commission'),
+                        ('invoice_line', '=', None),
                         ])
-                if commissions_origin:
-                    commissions += commissions_origin
-            Commission.delete(commissions)
-
+                if to_delete_origin:
+                    to_delete += to_delete_origin
+            Commission.delete(to_delete)
         return super(Invoice, cls).draft(invoices)
