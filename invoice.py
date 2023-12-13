@@ -64,7 +64,7 @@ class Invoice(metaclass=PoolMeta):
                     to_draft.append(invoice)
                 else:
                     to_save.append(invoice)
-                    cancel_move = move.cancel(reversal=True)
+                    cancel_move = move.cancel()
                     Move.post([cancel_move])
                     moves.extend((invoice.move, cancel_move))
                     invoice.move = None
