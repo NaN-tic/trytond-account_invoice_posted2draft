@@ -74,6 +74,8 @@ class Invoice(metaclass=PoolMeta):
                 moves.append(invoice.cancel_move)
                 invoice.cancel_move = None
             invoice.additional_moves += tuple(moves)
+            invoice.invoice_report_format = None
+            invoice.invoice_report_cache = None
 
         # Only make the special steps for the invoices that came from 'posted'
         # state or 'validated', 'cancelled' with number, so the invoice have one

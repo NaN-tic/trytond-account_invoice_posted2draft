@@ -16,6 +16,8 @@ Imports::
     ...     create_chart, get_accounts
     >>> from trytond.modules.account_invoice.tests.tools import \
     ...     set_fiscalyear_invoice_sequences, create_payment_term
+    >>> from trytond.modules.account.exceptions import CancelWarning
+
     >>> today = datetime.date.today()
 
 Install account_invoice_posted2draft::
@@ -108,7 +110,9 @@ Move it back to draft::
     >>> invoice.invoice_report_cache
     >>> receivable.reload()
     >>> receivable.debit
-    Decimal('0.00')
+    Decimal('200.00')
+    >>> receivable.credit
+    Decimal('200.00')
 
 Invoices can not be set to draft if period is closed::
 
@@ -117,4 +121,4 @@ Invoices can not be set to draft if period is closed::
     >>> invoice.click('draft')  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
-    UserError: ...
+    CancelWarning: ...
