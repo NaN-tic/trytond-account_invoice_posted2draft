@@ -101,3 +101,9 @@ class Invoice(metaclass=PoolMeta):
         # Remove links to lines which actually do not pay the invoice
         if to_save:
             cls._clean_payments(to_save)
+
+    @classmethod
+    def check_modify(cls, invoices):
+        if Transaction().context.get('invoice_posted2draft', False):
+            return
+        return super().check_modify(invoices)
