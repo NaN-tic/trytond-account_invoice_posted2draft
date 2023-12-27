@@ -17,6 +17,8 @@ class Invoice(metaclass=PoolMeta):
         for invoice in invoices:
             if invoice.move:
                 lines.extend([l.id for l in invoice.move.lines])
+                lines.extend([l.id for move in invoice.additional_moves
+                        for l in move.lines])
         if lines:
             payments = Payment.search([
                     ('line', 'in', lines),
