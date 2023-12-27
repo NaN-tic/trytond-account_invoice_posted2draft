@@ -25,23 +25,34 @@ class Invoice(metaclass=PoolMeta):
         pool = Pool()
         Move = pool.get('account.move')
         MoveLine = pool.get('account.move.line')
+        Reconcile = pool.get('account.move.reconciliation')
         JournalPeriod = pool.get('account.journal.period')
 
         moves = []
         payment_lines = []
+        reconciliation_to_delete = set()
         for invoice in invoices:
-            if invoice.move:
+            invoice_moves = [invoice.move] + list(invoice.additional_moves)
+            move_lines = [l for move in invoice_moves for l in move.lines]
+            for move in invoice_moves:
+                for line in move.lines:
+                    if line.reconciliation:
+                        line_reconciles = MoveLine.search([
+                                ('reconciliation', '=', line.reconciliation.id)
+                                ])
+                        if set(line_reconciles) - set(move_lines) == set():
+                            reconciliation_to_delete.add(line.reconciliation)
                 # check period is closed
-                if invoice.move.period.state == 'close':
+                if move.period.state == 'close':
                     raise UserError(gettext(
                         'account_invoice_posted2draft.msg_draft_closed_period',
                             invoice=invoice.rec_name,
-                            period=invoice.move.period.rec_name,
+                            period=move.period.rec_name,
                             ))
                 # check period and journal is closed
                 journal_periods = JournalPeriod.search([
-                        ('journal', '=', invoice.move.journal.id),
-                        ('period', '=', invoice.move.period.id),
+                        ('journal', '=', move.journal.id),
+                        ('period', '=', move.period.id),
                         ], limit=1)
                 if journal_periods:
                     journal_period, = journal_periods
@@ -51,13 +62,15 @@ class Invoice(metaclass=PoolMeta):
                                 'msg_modify_closed_journal_period',
                                 invoice=invoice.rec_name,
                                 journal_period=journal_period.rec_name))
-                moves.append(invoice.move)
+                moves.append(move)
             if invoice.payment_lines:
                 for payment_line in invoice.payment_lines:
                     if payment_line.move and payment_line.move.lines:
                         for lines in payment_line.move.lines:
                             payment_lines.append(lines)
 
+        if reconciliation_to_delete:
+            Reconcile.delete(reconciliation_to_delete)
         if moves:
             with Transaction().set_context(draft_invoices=True):
                 Move.write(moves, {'state': 'draft'})
