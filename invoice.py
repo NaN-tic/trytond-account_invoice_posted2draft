@@ -5,8 +5,6 @@ from trytond.pool import Pool, PoolMeta
 from trytond.model import fields
 from trytond.pyson import Eval
 from trytond.transaction import Transaction
-from trytond.i18n import gettext
-from trytond.exceptions import UserError
 
 
 class Invoice(metaclass=PoolMeta):
@@ -47,17 +45,14 @@ class Invoice(metaclass=PoolMeta):
         pool = Pool()
         Move = pool.get('account.move')
         MoveLine = pool.get('account.move.line')
-        JournalPeriod = pool.get('account.journal.period')
-        Warning = pool.get('res.user.warning')
 
-        moves = []
-        move_lines = []
         to_draft = []
         to_save = []
         for invoice in invoices:
             if not invoice.allow_draft:
                 continue
 
+            moves = []
             move = invoice.move
             if move:
                 if move.state == 'draft':
