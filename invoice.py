@@ -32,7 +32,10 @@ class Invoice(metaclass=PoolMeta):
         payment_lines = []
         reconciliation_to_delete = set()
         for invoice in invoices:
-            invoice_moves = [invoice.move] + list(invoice.additional_moves)
+            invoice_moves = []
+            if invoice.move:
+                invoice_moves.append(invoice.move)
+            invoice_moves += list(invoice.additional_moves)
             move_lines = [l for move in invoice_moves for l in move.lines]
             for move in invoice_moves:
                 for line in move.lines:
