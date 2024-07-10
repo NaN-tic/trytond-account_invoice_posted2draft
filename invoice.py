@@ -9,7 +9,6 @@ from trytond.transaction import Transaction
 
 class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
-
     allow_draft = fields.Function(
         fields.Boolean("Allow Draft Invoice"), 'get_allow_draft')
 
@@ -20,25 +19,31 @@ class Invoice(metaclass=PoolMeta):
         cls._buttons['draft']['invisible'] = ~Eval('allow_draft', False)
         cls._buttons['draft']['depends'] += tuple(['allow_draft'])
 
-    def get_allow_draft(self, name):
-        # when IN invoice is validate from scratch, the move is in 'draft'
-        # state, so in this case could be draft in a "normal" way
-        if (self.state == 'validated' and self.move
-                and self.move.state != 'draft'):
-            return False
-        elif self.state == 'cancelled' and self.number is not None:
-            return False
-        elif self.state in {'paid', 'draft'}:
-            return False
-        elif self.state == 'posted':
-            lines_to_pay = [l for l in self.lines_to_pay
-                if not l.reconciliation]
-            # Invoice already paid or partial paid, should not be possible
-            # to change state to draft.
-            if (not lines_to_pay
-                    or self.amount_to_pay != self.total_amount):
-                return False
-        return True
+    @classmethod
+    def get_allow_draft(cls, invoices, name):
+        res = dict((x.id, False) for x in invoices)
+
+        for invoice in invoices:
+            # when IN invoice is validate from scratch, the move is in 'draft'
+            # state, so in this case could be draft in a "normal" way
+            if (invoice.state == 'validated' and invoice.move
+                    and invoice.move.state != 'draft'):
+                continue
+            elif invoice.state == 'cancelled' and invoice.number is not None:
+                continue
+            elif invoice.state in {'paid', 'draft'}:
+                continue
+            elif invoice.state == 'posted':
+                lines_to_pay = [l for l in invoice.lines_to_pay
+                    if not l.reconciliation]
+                # Invoice already paid or partial paid, should not be possible
+                # to change state to draft.
+                if (not lines_to_pay
+                        or invoice.amount_to_pay != invoice.total_amount):
+                    continue
+            # in case not continue, set to True
+            res[invoice.id] = True
+        return res
 
     @classmethod
     def draft(cls, invoices):

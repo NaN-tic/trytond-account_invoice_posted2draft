@@ -3,24 +3,35 @@
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
 from trytond.tools import grouped_slice
+from trytond.transaction import Transaction
+from sql.operators import Concat
 
 
 class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
 
-    def get_allow_draft(self, name):
+    @classmethod
+    def get_allow_draft(cls, invoices, name):
         pool = Pool()
         Commission = pool.get('commission')
+        Line = pool.get('account.invoice.line')
 
-        result = super().get_allow_draft(name)
+        res = super().get_allow_draft(invoices, name)
 
-        invoiced = Commission.search([
-                ('origin.invoice', '=', self.id, 'account.invoice.line'),
-                ('invoice_line', '!=', None),
-                ])
-        if invoiced:
-            result = False
-        return result
+        line = Line.__table__()
+        commission = Commission.__table__()
+
+        invoice_ids = [i.id for i in invoices]
+        query = line.join(commission,
+            condition=commission.origin == Concat('account.invoice.line,', line.id)
+            ).select(line.invoice, where=line.invoice.in_(invoice_ids))
+
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*query)
+        for record in cursor.fetchall():
+            res[record[0]] = False
+
+        return res
 
     @classmethod
     def draft(cls, invoices):
