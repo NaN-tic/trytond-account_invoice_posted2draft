@@ -24,7 +24,9 @@ class Invoice(metaclass=PoolMeta):
         invoice_ids = [i.id for i in invoices]
         query = line.join(commission,
             condition=commission.origin == Concat('account.invoice.line,', line.id)
-            ).select(line.invoice, where=line.invoice.in_(invoice_ids))
+            ).select(line.invoice,
+                where=(line.invoice.in_(invoice_ids)
+                     & (commission.invoice_line != None)))
 
         cursor = Transaction().connection.cursor()
         cursor.execute(*query)
