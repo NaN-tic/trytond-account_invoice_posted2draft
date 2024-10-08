@@ -50,6 +50,7 @@ class Invoice(metaclass=PoolMeta):
         pool = Pool()
         Move = pool.get('account.move')
         MoveLine = pool.get('account.move.line')
+        TaxLine = pool.get('account.tax.line')
 
         to_draft = []
         to_save = []
@@ -90,13 +91,18 @@ class Invoice(metaclass=PoolMeta):
 
         for invoice in to_save:
             to_reconcile = []
+            tax_line_to_delete = []
             for move in invoice.additional_moves:
                 for line in move.lines:
                     if (not line.reconciliation
                             and line.account == invoice.account):
                         to_reconcile.append(line)
+                    if line.tax_lines:
+                        tax_line_to_delete.extend(line.tax_lines)
             if to_reconcile:
                 MoveLine.reconcile(to_reconcile)
+            if tax_line_to_delete:
+                TaxLine.delete(tax_line_to_delete)
 
         # Remove links to lines which actually do not pay the invoice
         if to_save:
