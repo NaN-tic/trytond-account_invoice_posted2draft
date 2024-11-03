@@ -32,5 +32,5 @@ class Invoice(metaclass=PoolMeta):
                         raise UserError(gettext('account_invoice_posted2draft'
                                 '.msg_invoice_in_payment',
                                 invoice=invoice.rec_name,
-                                payments=", ".join([p.id for p in payments])))
+                                payments=", ".join([str(p.id) for p in payments])))
         return super().draft(invoices)
