@@ -17,3 +17,7 @@ msgstr ""
 "apuntes relacionados a pagos [ID: %(payments)s]. Esto quiere decir que és "
 "posible que estos pagos esten ya en una remesa bancárea y ésta esté subida "
 "al Banco."
+
+msgctxt "model:res.group,name:group_invoice_draft"
+msgid "Invoice to Draft"
+msgstr "Factura en borrador"
