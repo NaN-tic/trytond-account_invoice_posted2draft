@@ -12,7 +12,7 @@ this repository contains the full copyright notices and license terms. -->
         </record>
 
         <record model="ir.model.button-res.group"
-            id="account_invoice.invoice_draft_button_group_account">
+            id="invoice_draft_button_group_account">
             <field name="button" ref="account_invoice.invoice_draft_button"/>
             <field name="group" ref="account_invoice_posted2draft.group_invoice_draft"/>
         </record>
