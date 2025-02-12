@@ -26,7 +26,8 @@ class Test(unittest.TestCase):
     def test(self):
 
         # Install account_invoice_posted2draft
-        activate_modules('account_invoice_posted2draft')
+        #activate_modules('account_invoice_posted2draft')
+        activate_modules(['account_invoice_posted2draft', 'account_es'])
 
         # Create company
         _ = create_company()
