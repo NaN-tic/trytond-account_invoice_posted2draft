@@ -2,7 +2,7 @@ import unittest
 from decimal import Decimal
 
 from proteus import Model
-from trytond.modules.account.exceptions import CancelWarning
+from trytond.model.modelstorage import DomainValidationError
 from trytond.modules.account.tests.tools import (create_chart,
                                                  create_fiscalyear,
                                                  get_accounts)
@@ -78,30 +78,71 @@ class Test(unittest.TestCase):
 
         # Create invoice
         Invoice = Model.get('account.invoice')
-        invoice = Invoice()
-        invoice.party = party
-        invoice.payment_term = payment_term
-        line = invoice.lines.new()
+        invoice1 = Invoice()
+        invoice1.party = party
+        invoice1.payment_term = payment_term
+        line = invoice1.lines.new()
         line.product = product
         line.quantity = 5
         line.unit_price = Decimal('40')
-        self.assertEqual(invoice.untaxed_amount, Decimal('200.00'))
-        invoice.click('post')
-        self.assertEqual(invoice.number, '1')
+        self.assertEqual(invoice1.untaxed_amount, Decimal('200.00'))
+        invoice1.click('post')
+        self.assertEqual(invoice1.number, '1')
         receivable.reload()
         self.assertEqual(receivable.debit, Decimal('200.00'))
 
         # Move it back to draft
-        invoice.click('draft')
-        self.assertEqual(invoice.number, '1')
-        invoice.invoice_report_cache
+        invoice1.click('draft')
+        self.assertEqual(invoice1.number, '1')
+        invoice1.invoice_report_cache
+        receivable.reload()
+        self.assertEqual(receivable.debit, Decimal('0'))
+        self.assertEqual(receivable.credit, Decimal('0'))
+
+        # Create invoice with reprograming payment date
+        invoice2 = Invoice()
+        invoice2.party = party
+        invoice2.payment_term = payment_term
+        line = invoice2.lines.new()
+        line.product = product
+        line.quantity = 5
+        line.unit_price = Decimal('40')
+        self.assertEqual(invoice2.untaxed_amount, Decimal('200.00'))
+        invoice2.click('post')
+        self.assertEqual(invoice2.number, '2')
         receivable.reload()
         self.assertEqual(receivable.debit, Decimal('200.00'))
-        self.assertEqual(receivable.credit, Decimal('200.00'))
+
+        #Reschedule line
+        reschedule = invoice2.click('reschedule_lines_to_pay')
+        reschedule_lines, = reschedule.actions
+        self.assertEqual(reschedule_lines.form.total_amount, Decimal('200.00'))
+        reschedule_lines.form.start_date = invoice2.move.period.end_date
+        reschedule_lines.form.frequency ='monthly'
+        reschedule_lines.form.number = 2
+        reschedule_lines.execute('preview')
+        reschedule_lines.execute('reschedule')
+
+        invoice2.reload()
+        self.assertEqual(invoice2.state, 'posted')
+        self.assertEqual(len(invoice2.lines_to_pay), Decimal('4'))
+        self.assertEqual(len([l for l in invoice2.lines_to_pay if not l.reconciliation]), Decimal('2'))
+        self.assertEqual(invoice2.amount_to_pay, Decimal('200.00'))
+        self.assertEqual(len(invoice2.additional_moves), Decimal('1'))
+
+        # Move it back to draft
+        invoice2.click('draft')
+        self.assertEqual(invoice2.number, '2')
+        invoice2.invoice_report_cache
+        self.assertEqual(invoice2.move, None)
+        self.assertEqual(invoice2.additional_moves, [])
+        receivable.reload()
+        self.assertEqual(receivable.debit, Decimal('0'))
+        self.assertEqual(receivable.credit, Decimal('0'))
 
         # Invoices can not be set to draft if period is closed
-        invoice.click('post')
-        invoice.move.period.click('close')
+        invoice1.click('post')
+        invoice1.move.period.click('close')
 
-        with self.assertRaises(CancelWarning):
-            invoice.click('draft')
+        with self.assertRaises(DomainValidationError):
+            invoice1.click('draft')
