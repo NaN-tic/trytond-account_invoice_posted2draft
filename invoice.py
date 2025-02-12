@@ -3,8 +3,11 @@
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
 from trytond.model import fields
+from itertools import groupby
 from trytond.pyson import Eval
 from trytond.transaction import Transaction
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 
 
 class Invoice(metaclass=PoolMeta):
@@ -24,14 +27,7 @@ class Invoice(metaclass=PoolMeta):
         res = dict((x.id, False) for x in invoices)
 
         for invoice in invoices:
-            # when IN invoice is validate from scratch, the move is in 'draft'
-            # state, so in this case could be draft in a "normal" way
-            if (invoice.state == 'validated' and invoice.move
-                    and invoice.move.state != 'draft'):
-                continue
-            elif invoice.state == 'cancelled' and invoice.number is not None:
-                continue
-            elif invoice.state in {'paid', 'draft'}:
+            if invoice.state in {'paid', 'draft'}:
                 continue
             elif invoice.state == 'posted':
                 lines_to_pay = [l for l in invoice.lines_to_pay
@@ -49,64 +45,45 @@ class Invoice(metaclass=PoolMeta):
     def draft(cls, invoices):
         pool = Pool()
         Move = pool.get('account.move')
-        MoveLine = pool.get('account.move.line')
-        TaxLine = pool.get('account.tax.line')
+        Reconciliation = pool.get('account.move.reconciliation')
 
-        to_draft = []
-        to_save = []
         for invoice in invoices:
             if not invoice.allow_draft:
                 continue
 
-            moves = []
-            move = invoice.move
-            if move:
-                if move.state == 'draft':
-                    to_draft.append(invoice)
-                else:
-                    to_save.append(invoice)
-                    cancel_move = move.cancel(reversal=True)
-                    Move.post([cancel_move])
-                    moves.extend((invoice.move, cancel_move))
-                    invoice.move = None
-            else:
-                to_draft.append(invoice)
-            if invoice.cancel_move:
-                moves.append(invoice.cancel_move)
-                invoice.cancel_move = None
-            invoice.additional_moves += tuple(moves)
-            invoice.invoice_report_format = None
-            invoice.invoice_report_cache = None
-
-        # Only make the special steps for the invoices that came from 'posted'
-        # state or 'validated', 'cancelled' with number, so the invoice have one
-        # or more move associated.
-        # The other possible invoices follow the standard workflow.
-        if to_draft:
-            super().draft(to_draft)
-        if to_save:
-            cls.save(to_save)
+            # Beofre delete all the moves related with the invoice ensure that
+            # all of them, if are reconcilied, are reconciliated themself, not
+            # with an "external" move.
+            moves = [x for x in ([invoice.move, invoice.cancel_move]
+                + list(invoice.additional_moves)) if x is not None]
+            if not moves:
+                continue
+            lines = [x for move in moves for line in move.lines
+                if line.reconciliation is not None
+                for x in line.reconciliation.lines]
+            lines = list(set(lines))
+            lines.sort(key=lambda line: line.reconciliation.id)
+            grouped_reconciliations = {
+                reconciliation: list({line.move for line in group})
+                for reconciliation, group in groupby(lines,
+                    key=lambda line: line.reconciliation)
+                }
+            for _, reconciliation_moves in grouped_reconciliations.items():
+                if not set(reconciliation_moves).issubset(set(moves)):
+                    raise UserError(gettext(
+                        'account_invoice_posted2draft.msg_not_allowed_to_draft',
+                        invoice=invoice.number))
+            Reconciliation.delete(grouped_reconciliations.keys())
             with Transaction().set_context(invoice_posted2draft=True):
-                super().draft(to_save)
-
-        for invoice in to_save:
-            to_reconcile = []
-            tax_line_to_delete = []
-            for move in invoice.additional_moves:
-                for line in move.lines:
-                    if (not line.reconciliation
-                            and line.account == invoice.account):
-                        to_reconcile.append(line)
-                    if line.tax_lines:
-                        tax_line_to_delete.extend(line.tax_lines)
-            if to_reconcile:
-                MoveLine.reconcile(to_reconcile)
-            if tax_line_to_delete:
-                TaxLine.delete(tax_line_to_delete)
-
-        # Remove links to lines which actually do not pay the invoice
-        if to_save:
-            cls._clean_payments(to_save)
+                Move.draft(moves)
+                Move.delete(moves)
+        with Transaction().set_context(invoice_posted2draft=True):
+            super().draft(invoices)
+        cls.write(invoices, {
+            'invoice_report_format': None,
+            'invoice_report_cache': None,
+            'invoice_report_cache_id': None,
+            })
 
     @classmethod
     def check_modify(cls, invoices):
