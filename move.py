@@ -19,10 +19,12 @@ class Move(metaclass=PoolMeta):
 
     def get_allow_draft(self, name):
         Invoice = Pool().get('account.invoice')
+        Move = Pool().get('account.move')
 
         result = super().get_allow_draft(name)
 
-        if self.origin and isinstance(self.origin, Invoice):
+        if (self.origin and (isinstance(self.origin, Invoice)
+                    or isinstance(self.origin, Move))):
             return True
         return result
 
