@@ -23,8 +23,7 @@ class Move(metaclass=PoolMeta):
 
         result = super().get_allow_draft(name)
 
-        if (self.origin and (isinstance(self.origin, Invoice)
-                    or isinstance(self.origin, Move))):
+        if self.origin and isinstance(self.origin, (Invoice, Move)):
             return True
         return result
 
