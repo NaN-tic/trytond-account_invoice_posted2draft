@@ -29,15 +29,9 @@ class Invoice(metaclass=PoolMeta):
         for invoice in invoices:
             if invoice.state in {'paid', 'draft'}:
                 continue
-            elif invoice.state == 'posted':
-                lines_to_pay = [l for l in invoice.lines_to_pay
-                    if not l.reconciliation]
-                # Invoice already paid or partial paid, should not be possible
-                # to change state to draft.
-                if (not lines_to_pay
-                        or invoice.amount_to_pay != invoice.total_amount):
-                    continue
-            # in case not continue, set to True
+            elif (invoice.state == 'posted' and (invoice.payment_lines
+                        or invoice.reconciliation_lines)):
+                continue
             res[invoice.id] = True
         return res
 
@@ -51,7 +45,7 @@ class Invoice(metaclass=PoolMeta):
             if not invoice.allow_draft:
                 continue
 
-            # Beofre delete all the moves related with the invoice ensure that
+            # Before delete all the moves related with the invoice ensure that
             # all of them, if are reconcilied, are reconciliated themself, not
             # with an "external" move.
             moves = [x for x in ([invoice.move, invoice.cancel_move]
