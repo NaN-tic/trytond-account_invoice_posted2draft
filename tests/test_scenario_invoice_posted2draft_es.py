@@ -26,7 +26,8 @@ class Test(unittest.TestCase):
     def test(self):
 
         # Install account_invoice_posted2draft
-        activate_modules('account_invoice_posted2draft')
+        activate_modules(['account_invoice_posted2draft', 'account_es'])
+
 
         # Create company
         _ = create_company()
@@ -145,4 +146,5 @@ class Test(unittest.TestCase):
         invoice2.click('post')
         invoice1.move.period.click('close')
 
-        invoice1.click('draft')
+        with self.assertRaises(DomainValidationError):
+            invoice1.click('draft')
