@@ -69,7 +69,8 @@ class Invoice(metaclass=PoolMeta):
                         invoice=invoice.number))
             Reconciliation.delete(grouped_reconciliations.keys())
             with Transaction().set_context(invoice_posted2draft=True):
-                Move.draft(moves)
+                if Move._buttons.get('draft', None):
+                    Move.draft(moves)
                 Move.delete(moves)
         with Transaction().set_context(invoice_posted2draft=True):
             super().draft(invoices)
