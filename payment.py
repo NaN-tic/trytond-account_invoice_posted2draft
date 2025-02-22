@@ -26,11 +26,16 @@ class Invoice(metaclass=PoolMeta):
                 if lines:
                     payments = Payment.search([
                             ('line', 'in', lines),
-                            ('state', '!=', 'failed'),
                             ])
-                    if payments:
-                        raise UserError(gettext('account_invoice_posted2draft'
-                                '.msg_invoice_in_payment',
-                                invoice=invoice.rec_name,
-                                payments=", ".join([str(p.id) for p in payments])))
+                    to_write = []
+                    for payment in payments:
+                        if payment.state != 'failed':
+                            raise UserError(gettext('account_invoice_posted2draft'
+                                    '.msg_invoice_in_payment',
+                                    invoice=invoice.rec_name,
+                                    payments=", ".join([str(p.id) for p in payments])))
+                        elif payment.state == 'failed':
+                            to_write.append(payment)
+                    if to_write:
+                        Payment.write(to_write, {'line': None})
         return super().draft(invoices)
