@@ -23,7 +23,7 @@ msgid ""
 "The invoice %(invoice)s could not be possible to draft, becasue it have one "
 "or more move lines reconciled."
 msgstr ""
-"No se pudo pasar a borrador la factura %(factura)s porque tiene una o más "
+"No se pudo pasar a borrador la factura %(invoice)s porque tiene una o más "
 "líneas de movimiento conciliadas."
 
 msgctxt "model:res.group,name:group_invoice_draft"
