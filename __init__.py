@@ -12,7 +12,6 @@ def register():
     Pool.register(
         invoice.Invoice,
         move.Move,
-        move.Line,
         module='account_invoice_posted2draft', type_='model')
     Pool.register(
         payment.Invoice,

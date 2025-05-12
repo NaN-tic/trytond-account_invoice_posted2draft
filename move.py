@@ -8,15 +8,6 @@ from trytond.transaction import Transaction
 class Move(metaclass=PoolMeta):
     __name__ = 'account.move'
 
-    @classmethod
-    def check_modify(cls, *args, **kwargs):
-        # As now the moves related to an invoice are not delete when 'draft'
-        # the invoice, is needed to modify some restricted fields when the
-        # move is in post state
-        if Transaction().context.get('invoice_posted2draft', False):
-            return
-        return super().check_modify(*args, **kwargs)
-
     def get_allow_draft(self, name):
         Invoice = Pool().get('account.invoice')
         Move = Pool().get('account.move')
@@ -26,16 +17,3 @@ class Move(metaclass=PoolMeta):
         if self.origin and isinstance(self.origin, (Invoice, Move)):
             return True
         return result
-
-
-class Line(metaclass=PoolMeta):
-    __name__ = 'account.move.line'
-
-    @classmethod
-    def check_modify(cls, lines, modified_fields=None):
-        # As now the moves related to an invoice are not delete when 'draft'
-        # the invoice, is needed to modify some restricted fields when the
-        # move is in post state
-        if Transaction().context.get('invoice_posted2draft', False):
-            return
-        return super().check_modify(lines, modified_fields)
