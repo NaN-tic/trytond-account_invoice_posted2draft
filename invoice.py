@@ -80,9 +80,3 @@ class Invoice(metaclass=PoolMeta):
             'invoice_report_cache': None,
             'invoice_report_cache_id': None,
             })
-
-    @classmethod
-    def check_modify(cls, invoices):
-        if Transaction().context.get('invoice_posted2draft', False):
-            return
-        return super().check_modify(invoices)
