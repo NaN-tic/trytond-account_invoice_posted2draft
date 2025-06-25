@@ -22,6 +22,13 @@ class Invoice(metaclass=PoolMeta):
         cls._buttons['draft']['invisible'] = ~Eval('allow_draft', False)
         cls._buttons['draft']['depends'] += tuple(['allow_draft'])
 
+    def get_allow_cancel(self, name):
+        allow_cancel = super().get_allow_cancel(name)
+        # not allow cancel invoices in case has number and not move
+        if self.number and not self.move:
+            return False
+        return allow_cancel
+
     @classmethod
     def get_allow_draft(cls, invoices, name):
         res = dict((x.id, False) for x in invoices)
@@ -34,6 +41,12 @@ class Invoice(metaclass=PoolMeta):
                 continue
             res[invoice.id] = True
         return res
+
+    @classmethod
+    def cancel(cls, invoices):
+        # check allow_cancel invoices
+        to_cancel = [invoice for invoice in invoices if invoice.allow_cancel]
+        super().cancel(to_cancel)
 
     @classmethod
     def draft(cls, invoices):
