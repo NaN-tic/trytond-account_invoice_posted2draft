@@ -33,6 +33,10 @@ class Test(unittest.TestCase):
         _ = create_company()
         company = get_company()
 
+        # allow cancel invoices
+        company.cancel_invoice_out = True
+        company.save()
+
         # Create fiscal year
         fiscalyear = set_fiscalyear_invoice_sequences(
             create_fiscalyear(company))
@@ -140,6 +144,35 @@ class Test(unittest.TestCase):
         receivable.reload()
         self.assertEqual(receivable.debit, Decimal('0'))
         self.assertEqual(receivable.credit, Decimal('0'))
+
+        # Create invoice and not allow cancel in case has number
+        invoice3 = Invoice()
+        invoice3.party = party
+        invoice3.payment_term = payment_term
+        line = invoice3.lines.new()
+        line.product = product
+        line.quantity = 5
+        line.unit_price = Decimal('40')
+        self.assertEqual(invoice3.untaxed_amount, Decimal('200.00'))
+        invoice3.click('post')
+        self.assertEqual(invoice3.number, '3')
+        self.assertEqual(invoice3.allow_draft, True)
+        invoice3.click('draft')
+        self.assertEqual(invoice3.number, '3')
+        self.assertEqual(invoice3.move, None)
+        self.assertEqual(invoice3.state, 'draft')
+        self.assertEqual(invoice3.allow_draft, False)
+        self.assertEqual(invoice3.allow_cancel, False)
+        invoice3.click('cancel')
+        # invoice state, keep in draft state
+        self.assertEqual(invoice3.state, 'draft')
+        invoice3.click('post')
+        self.assertEqual(invoice3.state, 'posted')
+        self.assertEqual(invoice3.allow_cancel, True)
+        invoice3.click('cancel')
+        self.assertEqual(invoice3.state, 'cancelled')
+        self.assertNotEqual(invoice3.move, None)
+        self.assertNotEqual(invoice3.cancel_move, None)
 
         # Invoices can not be set to draft if period is closed
         invoice1.click('post')
