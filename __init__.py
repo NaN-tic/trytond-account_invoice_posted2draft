@@ -3,6 +3,7 @@
 # the full copyright notices and license terms.
 from trytond.pool import Pool
 from . import invoice
+from . import invoice_es
 from . import commission
 from . import payment
 from . import move
@@ -21,4 +22,8 @@ def register():
     Pool.register(
         commission.Invoice,
         depends=['commission'],
+        module='account_invoice_posted2draft', type_='model')
+    Pool.register(
+        invoice_es.Invoice,
+        depends=['account_es'],
         module='account_invoice_posted2draft', type_='model')
