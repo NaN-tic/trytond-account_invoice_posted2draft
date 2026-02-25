@@ -83,7 +83,7 @@ class Test(unittest.TestCase):
 
         # Create invoice
         Invoice = Model.get('account.invoice')
-        invoice1 = Invoice()
+        invoice1 = Invoice(type='out')
         invoice1.party = party
         invoice1.payment_term = payment_term
         line = invoice1.lines.new()
@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
         self.assertEqual(receivable.credit, Decimal('0'))
 
         # Create invoice with reprograming payment date
-        invoice2 = Invoice()
+        invoice2 = Invoice(type='out')
         invoice2.party = party
         invoice2.payment_term = payment_term
         line = invoice2.lines.new()
@@ -146,7 +146,7 @@ class Test(unittest.TestCase):
         self.assertEqual(receivable.credit, Decimal('0'))
 
         # Create invoice and not allow cancel in case has number
-        invoice3 = Invoice()
+        invoice3 = Invoice(type='out')
         invoice3.party = party
         invoice3.payment_term = payment_term
         line = invoice3.lines.new()
