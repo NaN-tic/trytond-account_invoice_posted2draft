@@ -2,6 +2,7 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
+from trytond.model import ModelView
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 
@@ -10,6 +11,7 @@ class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
 
     @classmethod
+    @ModelView.button
     def draft(cls, invoices):
         pool = Pool()
         Payment = pool.get('account.payment')

@@ -2,6 +2,7 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
+from trytond.model import ModelView
 from trytond.tools import grouped_slice
 from trytond.transaction import Transaction
 from sql.operators import Concat
@@ -36,6 +37,7 @@ class Invoice(metaclass=PoolMeta):
         return res
 
     @classmethod
+    @ModelView.button
     def draft(cls, invoices):
         pool = Pool()
         Commission = pool.get('commission')

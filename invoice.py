@@ -2,7 +2,7 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
-from trytond.model import fields
+from trytond.model import ModelView, fields
 from itertools import groupby
 from trytond.pyson import Eval
 from trytond.transaction import Transaction
@@ -37,6 +37,7 @@ class Invoice(metaclass=PoolMeta):
         return res
 
     @classmethod
+    @ModelView.button
     def draft(cls, invoices):
         pool = Pool()
         Move = pool.get('account.move')
