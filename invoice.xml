@@ -14,7 +14,17 @@ this repository contains the full copyright notices and license terms. -->
         <record model="ir.model.button-res.group"
             id="invoice_draft_button_group_account">
             <field name="button" ref="account_invoice.invoice_draft_button"/>
-            <field name="group" ref="account_invoice_posted2draft.group_invoice_draft"/>
+            <field name="group" ref="group_invoice_draft"/>
+        </record>
+
+        <record model="ir.model.access"
+            id="access_move_reconciliation_invoice_draft">
+            <field name="model">account.move.reconciliation</field>
+            <field name="group" ref="group_invoice_draft"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="True"/>
         </record>
 
         <record model="ir.ui.view" id="invoice_view_tree">
