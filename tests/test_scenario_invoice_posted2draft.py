@@ -10,7 +10,7 @@ from trytond.modules.account_invoice.tests.tools import (
     create_payment_term, set_fiscalyear_invoice_sequences)
 from trytond.modules.company.tests.tools import create_company, get_company
 from trytond.tests.test_tryton import drop_db
-from trytond.tests.tools import activate_modules
+from trytond.tests.tools import activate_modules, set_user
 
 
 class Test(unittest.TestCase):
@@ -174,7 +174,37 @@ class Test(unittest.TestCase):
         self.assertNotEqual(invoice3.move, None)
         self.assertNotEqual(invoice3.cancel_move, None)
 
+        User = Model.get('res.user')
+        Group = Model.get('res.group')
+        invoice_user = User()
+        invoice_user.name = 'Invoice Draft'
+        invoice_user.login = 'invoice_draft'
+        invoice_user.company = company
+        invoice_user.companies.append(company)
+        accounting_group, = Group.find([('name', '=', 'Accounting')])
+        invoice_draft_group, = Group.find([('name', '=', 'Invoice to Draft')])
+        invoice_user.groups.append(accounting_group)
+        invoice_user.groups.append(invoice_draft_group)
+        invoice_user.save()
+
+        invoice4 = Invoice()
+        invoice4.party = party
+        invoice4.payment_term = payment_term
+        line = invoice4.lines.new()
+        line.product = product
+        line.quantity = 5
+        line.unit_price = Decimal('40')
+        invoice4.click('post')
+        self.assertEqual(invoice4.state, 'posted')
+
+        set_user(invoice_user.id)
+        invoice4 = Invoice(invoice4.id)
+        invoice4.click('draft')
+        self.assertEqual(invoice4.state, 'draft')
+        self.assertEqual(invoice4.move, None)
+
         # Invoices can not be set to draft if period is closed
+        set_user(1)
         invoice1.click('post')
         invoice2.click('post')
         invoice1.move.period.click('close')
