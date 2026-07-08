@@ -187,7 +187,7 @@ class Test(unittest.TestCase):
         invoice_user.groups.append(invoice_draft_group)
         invoice_user.save()
 
-        invoice4 = Invoice()
+        invoice4 = Invoice(type='out')
         invoice4.party = party
         invoice4.payment_term = payment_term
         line = invoice4.lines.new()
