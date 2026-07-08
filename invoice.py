@@ -69,8 +69,9 @@ class Invoice(metaclass=PoolMeta):
                     raise UserError(gettext(
                         'account_invoice_posted2draft.msg_not_allowed_to_draft',
                         invoice=invoice.number))
-            Reconciliation.delete(grouped_reconciliations.keys())
-            with Transaction().set_context(invoice_posted2draft=True):
+            with Transaction().set_context(
+                    invoice_posted2draft=True, _check_access=False):
+                Reconciliation.delete(grouped_reconciliations.keys())
                 if Move._buttons.get('draft', None):
                     Move.draft(moves)
                 Move.delete(moves)
