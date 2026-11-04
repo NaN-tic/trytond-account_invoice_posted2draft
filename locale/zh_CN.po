@@ -1,0 +1,34 @@
+#
+msgid ""
+msgstr ""
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgctxt "field:account.invoice,allow_draft:"
+msgid "Allow Draft Invoice"
+msgstr "允许转为草稿发票"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_invoice_in_payment"
+msgid ""
+"The invoice %(invoice)s could not be possible to draft, becasue it have one "
+"or more move lines in payments [IDs: %(payments)s]. This means that is "
+"possible that this payment will be in a payment group and this group upload "
+"on a Bank."
+msgstr ""
+"无法将发票 %(invoice)s 转为草稿，因为一个或多个会计分录已用于付款 "
+"[ID：%(payments)s]。这意味着该付款可能已包含在上传至银行的付款批次中。"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_not_allowed_to_draft"
+msgid ""
+"The invoice %(invoice)s could not be possible to draft, becasue it have one "
+"or more move lines reconciled."
+msgstr "无法将发票 %(invoice)s 转为草稿，因为一个或多个会计分录已核销。"
+
+msgctxt "model:res.group,name:group_invoice_draft"
+msgid "Invoice to Draft"
+msgstr "发票转为草稿"
