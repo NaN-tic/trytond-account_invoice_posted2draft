@@ -1,0 +1,37 @@
+#
+msgid ""
+msgstr ""
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "field:account.invoice,allow_draft:"
+msgid "Allow Draft Invoice"
+msgstr "Számla piszkozatra állításának engedélyezése"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_invoice_in_payment"
+msgid ""
+"The invoice %(invoice)s could not be possible to draft, becasue it have one "
+"or more move lines in payments [IDs: %(payments)s]. This means that is "
+"possible that this payment will be in a payment group and this group upload "
+"on a Bank."
+msgstr ""
+"A(z) %(invoice)s számla nem állítható piszkozatra, mert egy vagy több "
+"könyvelési sora fizetésben szerepel [azonosítók: %(payments)s]. Ez a fizetés"
+" olyan fizetési csoportban lehet, amelyet már feltöltöttek a bankhoz."
+
+#, python-format
+msgctxt "model:ir.message,text:msg_not_allowed_to_draft"
+msgid ""
+"The invoice %(invoice)s could not be possible to draft, becasue it have one "
+"or more move lines reconciled."
+msgstr ""
+"A(z) %(invoice)s számla nem állítható piszkozatra, mert egy vagy több "
+"könyvelési sora már ki van egyenlítve."
+
+msgctxt "model:res.group,name:group_invoice_draft"
+msgid "Invoice to Draft"
+msgstr "Számla visszaállítása piszkozatra"
