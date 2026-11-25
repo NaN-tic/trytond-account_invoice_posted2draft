@@ -1,0 +1,38 @@
+#
+msgid ""
+msgstr ""
+"Language: km\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgctxt "field:account.invoice,allow_draft:"
+msgid "Allow Draft Invoice"
+msgstr "អនុញ្ញាតឱ្យកំណត់វិក្កយបត្រជាសេចក្តីព្រាង"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_invoice_in_payment"
+msgid ""
+"The invoice %(invoice)s could not be possible to draft, becasue it have one "
+"or more move lines in payments [IDs: %(payments)s]. This means that is "
+"possible that this payment will be in a payment group and this group upload "
+"on a Bank."
+msgstr ""
+"មិនអាចកំណត់វិក្កយបត្រ %(invoice)s ជាសេចក្តីព្រាងបានទេ "
+"ព្រោះមានបន្ទាត់កំណត់ត្រាគណនេយ្យមួយ ឬច្រើនក្នុងការទូទាត់ [លេខសម្គាល់៖ "
+"%(payments)s]។ "
+"ការទូទាត់នេះអាចស្ថិតក្នុងក្រុមការទូទាត់ដែលបានបញ្ជូនទៅធនាគាររួចហើយ។"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_not_allowed_to_draft"
+msgid ""
+"The invoice %(invoice)s could not be possible to draft, becasue it have one "
+"or more move lines reconciled."
+msgstr ""
+"មិនអាចកំណត់វិក្កយបត្រ %(invoice)s ជាសេចក្តីព្រាងបានទេ "
+"ព្រោះវាមានបន្ទាត់កំណត់ត្រាគណនេយ្យមួយ ឬច្រើនដែលបានផ្ទៀងផ្ទាត់សមតុល្យ។"
+
+msgctxt "model:res.group,name:group_invoice_draft"
+msgid "Invoice to Draft"
+msgstr "កំណត់វិក្កយបត្រជាសេចក្តីព្រាង"
